@@ -18,6 +18,8 @@
         <input [(ngModel)] = "Password" type="password"  name="Password" id="Password">
         <button id= "Register" type="button" (click)="register()">Create new account</button>
 
+        <button *ngIf = "visible" (click) = "verification()">Click here to verify your email </button>
+
 
         </form>
 </div>
