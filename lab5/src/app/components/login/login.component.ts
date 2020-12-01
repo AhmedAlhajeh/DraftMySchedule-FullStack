@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit {
       
     }
     this.http.post<any>(this.URI + 'login', AccountInformation).subscribe(data => {
-      
+      console.log(data);
       if (data.message == 'You should put your email and password'){
         alert("You should put both your email and password");
         
@@ -28,9 +28,7 @@ export class LoginComponent implements OnInit {
       }else if(data.message == 'Please put a valid email'){
         alert("Please put a valid email");
       }
-      else if(data.message == 'Adminstrator'){
-        console.log("I work");
-        alert("it is working");
+      else if(data.message ==  'Administrator'){
         this.route.navigate(['/admin']);
       }
       else if(data.message ==  'Cannot login'){
@@ -50,6 +48,7 @@ export class LoginComponent implements OnInit {
       }
       else if(data.message == 'You have been successfully logged in'){
         alert("You have been successfully logged in");
+        localStorage.Token = data.AccessingToken;
         this.route.navigate(['/creating']);
       }
     })
