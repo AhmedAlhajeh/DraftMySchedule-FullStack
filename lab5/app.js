@@ -466,7 +466,7 @@ app.post('/login', async (req,res) =>{
     }
     const ShowResult = validateEmail(LoginEmail);
 
-    if(ShowResult == null){
+    if(!ShowResult){
         return res.send({ message: 'Please put a valid email'})
     }
 
@@ -508,31 +508,38 @@ app.post('/login', async (req,res) =>{
         })
     }
 
-    else if (Storage2.status == "Inactive") {
+    else if (Storage2.Verification == "Inactive") {
         return res.send({ message: 'Account Inactive, Contact Administrator' });
     } 
+    
+    
+        encryption.compare(LoginPassword, Storage2.Password, function(err, comparison) {
+            if(!err){
+                if (comparison) {  
+                    console.log("Step2")          
+                    const AccessingToken = generateToken(Storage2); // Login successful, so make access token
+                    const RefreshToken = jwt.sign(Storage2, RefreshingToken); // Refresh token to make new access tokens     
+                    Tokens.get('tokens').push({ RefreshingToken: RefreshToken }).write(); // Insert refresh token into persistent database     
+                    res.send({
+                        AccessingToken: AccessingToken,
+                        RefreshingToken: RefreshToken,
+                        UserName: Storage2.UserName,
+                        message: 'You have been successfully logged in'
+                    })
+                } else {
+                    return res.send({
+                        message: 'Wrong Password'
+                    })
+                }
 
-    try {        
-        if (await bcrypt.compare(Password, Storage2.Password)) {            
-            const AccessingToken = generateToken(Storage2); // Login successful, so make access token
-            const RefreshingToken = jwt.sign(Storage2, RefreshingToken); // Refresh token to make new access tokens     
-            Tokens.get('tokens').push({ RefreshingToken: RefreshingToken }).write(); // Insert refresh token into persistent database     
-            res.send({
-                AccessingToken: AccessingToken,
-                RefreshingToken: RefreshingToken,
-                UserName: Storage2.UserName,
-                message: 'You have been successfully logged in'
-            })
-        } else {
-            return res.send({
-                message: 'Wrong Password'
-            })
-        }
-    } catch {
-        return res.send({
-            message: 'Unable to login'
-        })
-    }
+            }
+            else{
+                return res.send({
+                    message: 'Unable to login'
+                })
+            }
+        });
+        
 })
 
     
