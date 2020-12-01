@@ -17,6 +17,7 @@ const UserInformation = low(adapter2);
 var Body_Parser = require('body-parser');
 app.use(Body_Parser.urlencoded({extended: false}));
 app.use(Body_Parser.json());
+const jwt = require('jsonwebtoken');
 const adapterToken = new filesync('Tokens.json');
 const Tokens = low(adapterToken);
 
@@ -39,12 +40,14 @@ db.defaults({schedules: []})
 UserInformation.defaults({UserInfo: []})
 .write()
 
+Tokens.defaults({tokens: []}).write()
+
 // to show the results to the frontend when I press search
 app.get('/api/courses/submit' , (req,res) => {
     FQuery = req.query;
     SubjectQuery = FQuery.Subject;
     ComponentQuery = FQuery.Component;
-    CourseNumberQuery = FQuery.CourseNumber;
+    CourseNumberQuery = FQuery.CourseNumber.toUpperCase();
     
     //if we are showing the results for all subjects, components, course number, and class name
     if (SubjectQuery == "Subject" && CourseNumberQuery == "" && ComponentQuery== "Component"){
@@ -71,7 +74,7 @@ app.get('/api/courses/submit' , (req,res) => {
             }
         } res.send(allstored);
     }
-    //if we wanna display the results using everything except the class name
+    //if we wanna display the results using Subject only
     else if (SubjectQuery != "Subject" && CourseNumberQuery == "" && ComponentQuery == "Component"){
          let allstored = [];
         for(i=0 ; i<data.length; i++){
@@ -81,11 +84,15 @@ app.get('/api/courses/submit' , (req,res) => {
         } res.send(allstored);
 
     }
-    //if we want to to display results using subject
+    //if we want to to display results using course number only
     else if (SubjectQuery=="Subject" && CourseNumberQuery != "" && ComponentQuery=="Component"){
-        res.send({
-            message: "Do not search by course number only."  //send back a message saying that you cannot search by course number only
-        })
+        let allstored = [];
+        for(i=0; i<data.length; i++){
+            if(CourseNumberQuery == data[i].catalog_nbr){
+                allstored.push(data[i]);
+            }
+        }
+        res.send(allstored);
     }
     else if (SubjectQuery=="Subject" && CourseNumberQuery == "" && ComponentQuery !="Component"){
         res.send({
@@ -150,6 +157,31 @@ app.get('/api/courses/search/:subjectcode', (req,res) => {
 
     
 });
+
+
+//show results by searching course code only
+app.get('/api/courses/searching/:coursecode', (req,res) => {
+    let coursecode = req.params.coursecode.toUpperCase();
+    let NumberArray = [];
+    for(k=0; k< data.length; k++){
+        if (coursecode == data[k].catalog_nbr){
+            NumberArray.push(data[k]);
+        }
+        
+    }
+    //no duplicating for the frond end part
+    NumberArray = removeDuplicates(NumberArray);
+    if(NumberArray.length <= 0){
+        res.status(404).send("Course Number does not exist");
+    }else {
+        res.send(NumberArray);
+    }
+
+    
+});
+
+
+
 
 //Get the Timetable entry for a given subject code and course code and optional component
 app.get('/api/courses/search/:subjectcode/:coursecode', (req,res) => {
@@ -417,8 +449,8 @@ function generateAdministratorToken(LogginIn){
     return jwt.sign(LogginIn, AdminToken, { expiresIn: '30m'})
 }
 
-function generateToken(LogginIn){
-    return jwt.sign(LogginIn, AdminToken, { expiresIn: '30m'})
+function generateToken(Storage2){
+    return jwt.sign(Storage2, AdminToken, { expiresIn: '30m'})
 }
 
 
@@ -443,8 +475,8 @@ app.post('/login', async (req,res) =>{
 
     if (LoginEmail == AdminEmail && LoginPassword == AdminPassword){
         let LogginIn = {
-            Email,
-            Password,
+            LoginEmail,
+            LoginPassword,
             UserName: "Administrator"
           };
 
@@ -482,13 +514,13 @@ app.post('/login', async (req,res) =>{
 
     try {        
         if (await bcrypt.compare(Password, Storage2.Password)) {            
-            const AccessingToken = generateToken(LogginIn); // Login successful, so make access token
-            const RefreshingToken = jwt.sign(LogginIn, RefreshingToken); // Refresh token to make new access tokens     
+            const AccessingToken = generateToken(Storage2); // Login successful, so make access token
+            const RefreshingToken = jwt.sign(Storage2, RefreshingToken); // Refresh token to make new access tokens     
             Tokens.get('tokens').push({ RefreshingToken: RefreshingToken }).write(); // Insert refresh token into persistent database     
             res.send({
                 AccessingToken: AccessingToken,
                 RefreshingToken: RefreshingToken,
-                UserName: LogginIn.UserName
+                UserName: Storage2.UserName
             })
         } else {
             return res.send({
