@@ -462,12 +462,12 @@ app.post('/login', async (req,res) =>{
     const LoginPassword = req.body.Password;
 
     if(!LoginEmail || !LoginPassword){
-        return res.send({message: "You should put your email and password"})
+        return res.send({message: 'You should put your email and password'})
     }
     const ShowResult = validateEmail(LoginEmail);
 
-    if(ShowResult.error){
-        return res.send({ message: "Please put a valid email"})
+    if(ShowResult == null){
+        return res.send({ message: 'Please put a valid email'})
     }
 
     const AdminEmail = "AhmedAlhajeh@uwo.ca";
@@ -488,11 +488,11 @@ app.post('/login', async (req,res) =>{
                 AccessingToken: AdministratorToken,
                 RefreshingToken: AdminRefreshToken,
                 UserName: LogginIn.UserName,
-                message: "Administrator"
+                message: 'Administrator'
               })
             } catch{
                 return res.send({
-                message: "Cannot login"
+                message: 'Cannot login'
               })
 
 
@@ -504,12 +504,12 @@ app.post('/login', async (req,res) =>{
     
     if (Storage2 == null) {
         return res.send({
-            message: "Email Not Found"
+            message: 'Email Not Found'
         })
     }
 
     else if (Storage2.status == "Inactive") {
-        return res.send({ message: "Account Inactive, Contact Administrator" });
+        return res.send({ message: 'Account Inactive, Contact Administrator' });
     } 
 
     try {        
@@ -520,16 +520,17 @@ app.post('/login', async (req,res) =>{
             res.send({
                 AccessingToken: AccessingToken,
                 RefreshingToken: RefreshingToken,
-                UserName: Storage2.UserName
+                UserName: Storage2.UserName,
+                message: 'You have been successfully logged in'
             })
         } else {
             return res.send({
-                message: "Wrong Password"
+                message: 'Wrong Password'
             })
         }
     } catch {
         return res.send({
-            message: "Unable to login"
+            message: 'Unable to login'
         })
     }
 })

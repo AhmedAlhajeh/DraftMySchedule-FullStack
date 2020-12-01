@@ -2,9 +2,11 @@
     <form>
 
         <label for="Email">Email:</label>
-        <input type="text"  name="Email" id="Email">
+        <input [(ngModel)] = "Email" type="text"  name="Email" id="Email">
+        <br>
+        <br>
         <label for="Password">Password:</label>
-        <input type="text"  name="Password" id="Password">
+        <input [(ngModel)] = "Password" type="password"  name="Password" id="Password">
         <button id= "LogIn" type="button" (click)="logIn()">Login</button>
 
 
