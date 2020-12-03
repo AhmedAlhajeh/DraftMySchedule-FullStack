@@ -1,3 +1,8 @@
+
+<app-navbar></app-navbar>
+  
+
+
 <div id="subject" class="subject">
     <form >
         <label for="Subject">Subject:</label>
@@ -29,9 +34,16 @@
         </select>
         
         <br><br>
+
     
 
         <button id= "Submit" type= "button"  (click) = "courseSearch()" >Submit</button>
+        <br><br>
+        <label for="Keywords">Keyword</label>
+        <input type= "text" name="Keywords" id="Keywords">
+        <br><br>
+        <button id = "KeywordSubmit" type= "button" (click)= "keywordSearch()">Search</button>
+        
       </form>
 
 
@@ -40,34 +52,28 @@
 
         <div *ngFor = "let course of courses" >
 
-          <h1>{{ course.className }}</h1>
-          <p>{{ course.catalog_description }}</p>
+          
+          <h1>{{ course.subject}} {{course.catalog_nbr}}</h1>
+          <h3>{{ course.className }}</h3>
+          <button class= "DetailButton" (click) = "showDetail(course.subject, course.catalog_nbr)" id= "DetailButton">Details</button>
+          
           <table>
             <tr>
                 <th>Section</th>
                 <th>Component</th>
-                <th>Class Number</th>
                 <th>Days</th>
                 <th>Start Time</th>
-                <th>End Name</th>
-                <th>Campus</th>
-                <th>Classroom location</th>
-                <th>Instructions</th>
-                <th>Status</th>
-                <th>Descreption</th>
+                <th>End Time</th>
+                
            </tr>
               <tr>
                 <td>{{ course.course_info[0].class_section }}</td>
                 <td class="{{ course.course_info[0].ssr_component }}">{{ course.course_info[0].ssr_component }}</td>
-                <td>{{ course.course_info[0].class_nbr }}</td>
                 <td>{{ course.course_info[0].days }}</td>
                 <td>{{ course.course_info[0].start_time }}</td>
                 <td>{{ course.course_info[0].end_time }}</td>
-                <td>{{ course.course_info[0].campus }}</td>
-                <td>{{ course.course_info[0].facility_ID }}</td>
-                <td>{{ course.course_info[0].instructions }}</td>
-                <td>{{ course.course_info[0].enrl_stat }}</td>
-                <td>{{ course.course_info[0].descr }}</td>
+              
+                
               </tr>
   
         </table>

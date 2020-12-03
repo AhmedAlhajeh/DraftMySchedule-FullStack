@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+
 @Component({
   selector: 'app-browsing',
   templateUrl: './browsing.component.html',
@@ -24,7 +25,7 @@ export class BrowsingComponent implements OnInit {
     var url = '/api/courses/submit?' + "Subject=" + subject + "&CourseNumber=" + CourseNum + "&Component=" + component;
     
     //connect it to the back end and get the info form json file
-    this.http.get<any>("http://localhost:3000"+ url).subscribe(data =>{
+    this.http.get<any>( this.URI + url).subscribe(data =>{
       if(data.length == undefined){ //if we are trying to search all subjects and courses at the same time
         alert(data.message);
         return;
@@ -43,6 +44,36 @@ export class BrowsingComponent implements OnInit {
     
     
     
+  }
+
+  keywordSearch(): void {
+    var keyword2 = (<HTMLInputElement>document.getElementById('Keywords')).value;
+    var url2 = '/keywords?keyword=' + keyword2;
+    this.http.get<any>(this.URI + url2).subscribe(data => {
+      if(data.length == undefined){ //if we are trying to search all subjects and courses at the same time
+        alert(data.message);
+        return;
+      }
+      this.courses = data; //we put data in the array we created above
+    })
+  }
+
+  showDetail(subject: String, catalog_nbr: String){
+     this.http.get<any>(this.URI + '/api/courses/search/'+ subject + "/" + catalog_nbr).subscribe(data => {
+      let alertString = "";       //Alert string to be displayed
+      alertString += data.subject + " " + data.catalog_nbr + "\r\n";
+      alertString += data.catalog_description + "\r\n\r\n";
+      for(let i = 0; i < data.course_info.length; i++) {
+        alertString += data.course_info[i].enrl_stat + "\r\n";
+        alertString += data.course_info[i].class_nbr + "\r\n";
+        alertString += data.course_info[i].facility_ID + "\r\n";
+        alertString += data.course_info[i].campus + "\r\n";
+        alertString += data.course_info[i].instructors + "\r\n";
+        alertString += data.course_info[i].descr + "\r\n";
+        alertString += "\r\n";
+      }
+      alert(alertString); 
+     })
   }
   
   //Automatically makes the drop down menu for searching subjects work
