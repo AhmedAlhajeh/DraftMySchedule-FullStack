@@ -553,11 +553,11 @@ app.post('/login', async (req,res) =>{
     })
 
     //Reactivation the user
-    /*app.put('/reactivation', (req,res) => {
+    app.put('/reactivation', (req,res) => {
         reactivation = req.body.Email;
         User_Reactivation = UserInformation.get('UserInfo').find({Email: reactivation}).assign({Verification: "Active"}).write();
         res.send({message: "Reactivated"});
-    })*/
+    })
 
 
 
