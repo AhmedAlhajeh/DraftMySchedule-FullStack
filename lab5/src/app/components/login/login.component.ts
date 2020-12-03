@@ -51,6 +51,9 @@ export class LoginComponent implements OnInit {
         localStorage.Token = data.AccessingToken;
         this.route.navigate(['/creating']);
       }
+      else if(data.message == 'You cannot login. Your account is deactivated'){
+        alert("The Account is disabled. please contact the admin by sending an email to AhmedAlhajeh@uwo.ca");
+      }
     })
 
   }

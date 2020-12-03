@@ -295,7 +295,7 @@ const QuerySchema = joi.object({
     })
     const RESULT1 = QuerySchema.validate(req.query);
     if (RESULT1.error){
-        res.status(400).send("Bad Query");
+        res.send("Bad Query");
         return; 
 
     }
@@ -312,14 +312,14 @@ const QuerySchema = joi.object({
         }
         }
         if(alreadyExists){
-            res.status(400).send("This course is already exist!");
+            res.send("This course is already exist!");
             return;
         }
       schedules.CourseList.push({"subject":subject,"catalog_nbr":course});
       db.set({schedules: schedules}).write();
       res.send("The values are saved to the schedule");
     } else {
-      res.status(404).send("not saved yet!");
+      res.send("not saved yet!");
     }
 
 
@@ -402,7 +402,7 @@ app.post('/register', async(req,res) => {
         UserName: req.body.UserName,
         Email: req.body.Email,
         Password: protect,
-        Verification: req.body.Verification
+        Verification: "Inactive"
     }
     CurrentData2 =req.body.Email;
     RegisterResult = UserInformation.get('UserInfo').find({Email: CurrentData2}).value()
@@ -450,7 +450,7 @@ function generateAdministratorToken(LogginIn){
 }
 
 function generateToken(Storage2){
-    return jwt.sign(Storage2, AdminToken, { expiresIn: '30m'})
+    return jwt.sign(Storage2, AccessToken, { expiresIn: '30m'})
 }
 
 
@@ -485,7 +485,7 @@ app.post('/login', async (req,res) =>{
               const AdminRefreshToken = jwt.sign(LogginIn, AdminToken);
               Tokens.get('tokens').push({AdminRefreshToken: AdminRefreshToken}).write();
               return res.send({
-                AccessingToken: AdministratorToken,
+                AccessingToken: AdministratorToken, //Should be AccessToken for the first part??
                 RefreshingToken: AdminRefreshToken,
                 UserName: LogginIn.UserName,
                 message: 'Administrator'
@@ -509,14 +509,17 @@ app.post('/login', async (req,res) =>{
     }
 
     else if (Storage2.Verification == "Inactive") {
-        return res.send({ message: 'Account Inactive, Contact Administrator' });
+     res.send({ message: 'Account Inactive, Contact Administrator' });
+     return;
     } 
+    else if (Storage2.Verification == "Deactivated"){
+        return res.send({message: 'You cannot login. Your account is deactivated'});
+    }
     
     
         encryption.compare(LoginPassword, Storage2.Password, function(err, comparison) {
             if(!err){
-                if (comparison) {  
-                    console.log("Step2")          
+                if (comparison) {           
                     const AccessingToken = generateToken(Storage2); // Login successful, so make access token
                     const RefreshToken = jwt.sign(Storage2, RefreshingToken); // Refresh token to make new access tokens     
                     Tokens.get('tokens').push({ RefreshingToken: RefreshToken }).write(); // Insert refresh token into persistent database     
@@ -542,11 +545,19 @@ app.post('/login', async (req,res) =>{
         
 })
 
-    
-    /*const Storage2 = UserInformation.get('UserInfo').find({Email: LoginEmail}).value()
-    if(Storage2 != undefined){
-        res.send(Storage2);
-    }*/
+    //Deactivation the user
+    app.put('/deactivation', (req,res) => {
+        deactivation = req.body.Email;
+        User_Deactivation = UserInformation.get('UserInfo').find({Email: deactivation}).assign({Verification: "Deactivated"}).write();
+        res.send({message: "Deactivated"});
+    })
+
+    //Reactivation the user
+    /*app.put('/reactivation', (req,res) => {
+        reactivation = req.body.Email;
+        User_Reactivation = UserInformation.get('UserInfo').find({Email: reactivation}).assign({Verification: "Active"}).write();
+        res.send({message: "Reactivated"});
+    })*/
 
 
 
