@@ -20,6 +20,7 @@ app.use(Body_Parser.json());
 const jwt = require('jsonwebtoken');
 const adapterToken = new filesync('Tokens.json');
 const Tokens = low(adapterToken);
+const String_Sim = require('string-similarity');
 
 
 const AdminToken = 'LRnozVHim9pOVkc6ZlJK'
@@ -557,6 +558,32 @@ app.post('/login', async (req,res) =>{
         reactivation = req.body.Email;
         User_Reactivation = UserInformation.get('UserInfo').find({Email: reactivation}).assign({Verification: "Active"}).write();
         res.send({message: "Reactivated"});
+    })
+
+    //Search by keywords
+    app.get('/keywords', (req,res) => {
+        keyword = req.query.keyword.toUpperCase();
+        let Keyword1Array = [];
+        for(i=0; i< data.length; i++){
+            let NameID = data[i].className;
+            let catalog = data[i].catalog_nbr.toString();
+            let NameSim = String_Sim.compareTwoStrings(NameID, keyword);
+            let CatalogSim = String_Sim.compareTwoStrings(catalog, keyword);
+            if(NameSim >= 0.55 || CatalogSim >= 0.55){ //0.55 is reasonable number for two characters difference 
+                Keyword1Array.push(data[i]);
+
+            }
+
+        }
+        
+        if(Keyword1Array.length == 0){
+            res.send({ message: "no search results found"});
+        }
+        else{
+            res.send(Keyword1Array);
+        }
+
+
     })
 
 
