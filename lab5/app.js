@@ -551,14 +551,14 @@ app.post('/login', async (req,res) =>{
     app.put('/deactivation', (req,res) => {
         deactivation = req.body.Email;
         User_Deactivation = UserInformation.get('UserInfo').find({Email: deactivation}).assign({Verification: "Deactivated"}).write();
-        res.send({message: "Deactivated"});
+        res.send({message: 'Deactivated'});
     })
 
     //Reactivation the user
     app.put('/reactivation', (req,res) => {
         reactivation = req.body.Email;
         User_Reactivation = UserInformation.get('UserInfo').find({Email: reactivation}).assign({Verification: "Active"}).write();
-        res.send({message: "Reactivated"});
+        res.send({message: 'Reactivated'});
     })
 
     //Search by keywords
