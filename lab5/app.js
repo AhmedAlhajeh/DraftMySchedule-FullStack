@@ -375,6 +375,7 @@ app.delete('/api/schedules', (req,res) => {
         return res.status(404).send("The schedule name is not found ");
     }
 });
+
 //Get a list of schedule names and the number of courses that are saved in each schedule.
 app.get('/api/schedules/schedulesList', (req,res) => {
            
@@ -585,6 +586,17 @@ app.post('/login', async (req,res) =>{
 
 
     })
+    //Show all users list for the admin
+    app.get('/usersList', (req,res) => {
+           
+        let UserArray = [];
+        UserArray = UserInformation.get('UserInfo').value();
+        
+        
+       
+        res.send(UserArray);
+    
+});
 
 
 
