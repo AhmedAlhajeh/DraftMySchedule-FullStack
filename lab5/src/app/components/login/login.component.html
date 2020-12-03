@@ -9,6 +9,8 @@
         <input [(ngModel)] = "Password" type="password"  name="Password" id="Password">
         <button id= "LogIn" type="button" (click)="logIn()">Login</button>
 
+        <button *ngIf = "visible" (click) = "verification()">Click here to verify your email </button>
+
 
         </form>
 </div>

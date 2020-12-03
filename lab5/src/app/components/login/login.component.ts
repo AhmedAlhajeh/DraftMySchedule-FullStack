@@ -10,8 +10,10 @@ import { Router } from '@angular/router';
 export class LoginComponent implements OnInit {
   Email!: String;
   Password!: String;
+  Verification!: String;
   URI= "http://localhost:3000/"
   constructor(private http: HttpClient, private route: Router) { }
+  visible: boolean = false;
 
   logIn(): void {
     var AccountInformation = {
@@ -39,6 +41,7 @@ export class LoginComponent implements OnInit {
       }
       else if(data.message == 'Account Inactive, Contact Administrator'){
         alert("Account Inactive, Contact Administrator");
+        this.visible = true;
       }
       else if(data.message == 'Wrong Password'){
         alert("Wrong Password");
@@ -57,6 +60,22 @@ export class LoginComponent implements OnInit {
     })
 
   }
+
+
+  verification(): void {
+    var UsernameInformationForVerification = {
+    Email: this.Email,
+    Password: this.Password,
+    Verification: this.Verification
+    }
+    this.http.put<any>(this.URI + 'verification', UsernameInformationForVerification).subscribe(data => {
+      if(data.message == 'Verified'){
+        this.route.navigate(['/verified']);
+      }
+      
+
+    })
+}
 
   ngOnInit(): void {
   }
