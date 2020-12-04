@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-creating',
@@ -9,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
 export class CreatingComponent implements OnInit {
   courses: any[];
   regexCharacters = /^[^<>:/?#@!&;]*$/;
-  constructor(private http: HttpClient) {this.courses = []; }
+  constructor(private http: HttpClient, private route: Router) {this.courses = []; }
   
   URI = 'http://localhost:3000';
    //We use this so we can access it in html file to display time table
@@ -18,25 +19,41 @@ export class CreatingComponent implements OnInit {
  createASchedule(): void {
    var SCHEDULENAME = (<HTMLInputElement>document.getElementById('ScheduleName')).value;
    var SCHEDULEDESCRIPTION = (<HTMLInputElement>document.getElementById('ScheduleDescription')).value;
-   if(SCHEDULENAME.match(this.regexCharacters)){ //input sanitization we add a schedule name
+   if(SCHEDULENAME.length == 0 || SCHEDULENAME.length == undefined){
+     alert("Please input a name for the schedule");
+     return;
+   }
+   if(SCHEDULENAME.match(this.regexCharacters) && SCHEDULEDESCRIPTION.match(this.regexCharacters)){ //input sanitization we add a schedule name
     var ScheduleToken = {
       Token: localStorage.Token
     }
      
     if(SCHEDULEDESCRIPTION == ""){
+
+      
       //connect it to the back end by adding a schedule name
    this.http.post<any>(this.URI + '/api/schedules/createschedule?name='+SCHEDULENAME + '&ScheduleToken=' + ScheduleToken.Token, ScheduleToken).subscribe(data =>{
+    if(data.message = "The schedule name is already exist"){
+      alert("The schedule name is already exist")
+    }
+    else{
     alert(data.message);
     location.reload();
-     
+    }
     })
 
     }
     else{
       //connect it to the back end by adding a schedule name
    this.http.post<any>(this.URI + '/api/schedules/createschedule?name='+SCHEDULENAME + '&description=' + SCHEDULEDESCRIPTION + '&ScheduleToken=' + ScheduleToken.Token, ScheduleToken).subscribe(data =>{
-    alert("The schedule with the name you entered has been created");
+    if(data.message = "The schedule name is already exist"){
+      alert("The schedule name is already exist")
+    }
+    else{
+    alert("The schedule with the name and description you entered has been created");
     location.reload();
+  }
+    
      
   })
     } 
@@ -93,6 +110,10 @@ export class CreatingComponent implements OnInit {
   
    //Automatically makes the drop down menu for searching subjects work
   ngOnInit()  {
+    if(localStorage.Token == "" || localStorage.Token == undefined){
+      this.route.navigate(['/Home']);
+    }
+
     this.http.get<any>(this.URI + '/api/courses').subscribe(data => {
       const SubjectDropDown = document.getElementById('Subject');
       for (let i=0; i <data.SubjectArray.length; i++) {

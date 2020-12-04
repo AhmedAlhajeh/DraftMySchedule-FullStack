@@ -14,15 +14,18 @@ export class RegisterationComponent implements OnInit {
   Verification!: String;
 
   URI= "http://localhost:3000/"
+  regexCharacters = /^[^<>:/?#@!&;]*$/;
   
   constructor(private http: HttpClient, private route: Router) { }
 
   visible: boolean = false; 
   register(): void {
+    var CheckUserName = (<HTMLInputElement>document.getElementById("UserName")).value;
+    if(CheckUserName.match(this.regexCharacters)){
     var UsernameInformation = {
       UserName: this.UserName,
       Email: this.Email,
-      Password: this.Password,
+      Password: this.Password
       
     }
     
@@ -33,11 +36,14 @@ export class RegisterationComponent implements OnInit {
         this.visible = true;
 
       }else if(data.message == 'The email is already exist!'){
-        alert("The email is already exist!");
+        alert("The email already exists!");
       }
     })
 
-
+    }
+    else{
+      alert("Bad UserName Input");
+    }
   }
 
   verification(): void {
