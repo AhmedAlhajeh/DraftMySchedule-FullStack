@@ -13,7 +13,13 @@
 
         <button id= "Display" type= "button"  (click) = "displaySchedule()" >Display Schedule</button>
         <button id= "Delete" type= "button"  (click) ="DeleteSchedules()">Delete Schedules</button>
-        <button id= "Del" type="button" (click) = "deleteASchedule()">Delete the chosen Schedule</button>
+        <br><br>
+        <button id= "Try" type="button" (click) = "tryToDelete()">Delete This Schedule</button>
+        <br><br>
+        <label *ngIf = "visible">Are you Sure you want to delete the selected schedule?</label>
+        <button *ngIf = "visible" id="decline" type="button" (click) = "decline()">Cancel </button>
+        <button *ngIf = "visible" id= "Del" type="button" (click) = "deleteASchedule()">Confirm</button>
+        <br><br>
         <button id= "Public" type="button" (click) = "publicSchedule()">Public</button>
         <button id= "Private" type="button" (click) = "privateSchedule()">Private</button>
 

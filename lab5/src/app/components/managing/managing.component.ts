@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-managing',
@@ -8,8 +9,9 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ManagingComponent implements OnInit {
   courses2: any[]; //We use this so we can access it in html file to display time table
-  constructor(private http: HttpClient) { this.courses2 = []}
+  constructor(private http: HttpClient, private route: Router) { this.courses2 = []}
   URI = 'http://localhost:3000';
+  visible: boolean = false; 
   
   //delete all schedules functionality
   DeleteSchedules(): void {
@@ -38,6 +40,13 @@ export class ManagingComponent implements OnInit {
     });
     
 
+  }
+  tryToDelete(): void {
+    this.visible = true;
+  }
+
+  decline(): void {
+    this.visible = false;
   }
   //deleting a specific schedule functionality
   deleteASchedule(): void {
@@ -81,6 +90,10 @@ export class ManagingComponent implements OnInit {
 
   //Automatically makes the drop menu for schedules names work
   ngOnInit(): void {
+    if(localStorage.Token == "" || localStorage.Token == undefined){
+      this.route.navigate(['/Home']);
+    }
+    
 
     this.http.get<any>(this.URI + '/api/schedules/schedulesList?ScheduleToken=' + localStorage.Token).subscribe(data => {
       
