@@ -60,19 +60,19 @@ export class BrowsingComponent implements OnInit {
 
   showDetail(subject: String, catalog_nbr: String){
      this.http.get<any>(this.URI + '/api/courses/search/'+ subject + "/" + catalog_nbr).subscribe(data => {
-      let alertString = "";       //Alert string to be displayed
-      alertString += data.subject + " " + data.catalog_nbr + "\r\n";
-      alertString += data.catalog_description + "\r\n\r\n";
-      for(let i = 0; i < data.course_info.length; i++) {
-        alertString += data.course_info[i].enrl_stat + "\r\n";
-        alertString += data.course_info[i].class_nbr + "\r\n";
-        alertString += data.course_info[i].facility_ID + "\r\n";
-        alertString += data.course_info[i].campus + "\r\n";
-        alertString += data.course_info[i].instructors + "\r\n";
-        alertString += data.course_info[i].descr + "\r\n";
-        alertString += "\r\n";
-      }
-      alert(alertString); 
+      let DetailString = "";       //Alert string to be displayed
+      DetailString += data.subject + " " + data.catalog_nbr + "\r\n";
+      DetailString += data.catalog_description + "\r\n\r\n";
+       
+      DetailString += data.course_info[0].enrl_stat + "\r\n";
+      DetailString += data.course_info[0].class_nbr + "\r\n";
+      DetailString += data.course_info[0].facility_ID + "\r\n";
+      DetailString += data.course_info[0].campus + "\r\n";
+      DetailString += data.course_info[0].instructors + "\r\n";
+      DetailString += data.course_info[0].descr + "\r\n";
+      DetailString += "\r\n";
+      
+      alert(DetailString); 
      })
   }
   
