@@ -1,0 +1,71 @@
+<app-authenticated-navbar></app-authenticated-navbar>
+
+<div id="subject" class="subject">
+    <form >
+        <label for="ScheduleName">Schedule Name:</label>
+        <select name="ScheduleName" id="ScheduleName">
+        </select>
+        
+        <br><br>
+        
+      
+    
+
+        <button id= "Display" type= "button"  (click) = "displaySchedule()" >Display Schedule</button>
+        <button id= "Delete" type= "button"  (click) ="DeleteSchedules()">Delete Schedules</button>
+        <button id= "Del" type="button" (click) = "deleteASchedule()">Delete the chosen Schedule</button>
+        <button id= "Public" type="button" (click) = "publicSchedule()">Public</button>
+        <button id= "Private" type="button" (click) = "privateSchedule()">Private</button>
+
+      </form>
+      
+      
+      
+      
+</div>
+<div id= "resultbox2"> 
+
+
+
+
+
+
+</div>
+
+<div *ngFor = "let course2 of courses2" >
+ <h1>{{ course2.subject}} {{course2.catalog_nbr}}</h1>
+ <h3>{{ course2.className }}</h3>
+ <p>{{ course2.catalog_description }}</p> 
+ <table>
+   <tr>
+       <th>Section</th>
+       <th>Component</th>
+       <th>Class Number</th>
+       <th>Days</th>
+       <th>Start Time</th>
+       <th>End Name</th>
+       <th>Campus</th>
+       <th>Classroom location</th>
+       <th>Instructions</th>
+       <th>Status</th>
+       <th>Descreption</th>
+  </tr>
+  <tr>
+    <td>{{ course2.course_info[0].class_section }}</td>
+    <td class="{{ course2.course_info[0].ssr_component }}">{{ course2.course_info[0].ssr_component }}</td>
+    <td>{{ course2.course_info[0].class_nbr }}</td>
+    <td>{{ course2.course_info[0].days }}</td>
+    <td>{{ course2.course_info[0].start_time }}</td>
+    <td>{{ course2.course_info[0].end_time }}</td>
+    <td>{{ course2.course_info[0].campus }}</td>
+    <td>{{ course2.course_info[0].facility_ID }}</td>
+    <td>{{ course2.course_info[0].instructions }}</td>
+    <td>{{ course2.course_info[0].enrl_stat }}</td>
+    <td>{{ course2.course_info[0].descr }}</td>
+  </tr>
+     
+
+</table>
+
+
+</div>

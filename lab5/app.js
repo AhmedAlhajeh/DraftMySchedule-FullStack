@@ -58,8 +58,13 @@ app.get('/api/courses/submit' , (req,res) => {
     else if (SubjectQuery != "Subject" && CourseNumberQuery != "" && ComponentQuery != "Component" ){
          let allstored = [];
         for(i=0; i<data.length;i++){
+            //we can search by 3316 and 3316A
+            let coursecodeCheck = data[i].catalog_nbr.toString();
+            if(!isNaN(CourseNumberQuery)) {
+            coursecodeCheck = coursecodeCheck.replace(/\D/g,'');
+            }
     
-            if(SubjectQuery == data[i].subject && CourseNumberQuery == data[i].catalog_nbr && ComponentQuery== data[i].course_info[0].ssr_component){
+            if(SubjectQuery == data[i].subject && CourseNumberQuery == coursecodeCheck && ComponentQuery== data[i].course_info[0].ssr_component){
              
                 allstored.push(data[i]);
 
@@ -70,7 +75,11 @@ app.get('/api/courses/submit' , (req,res) => {
     else if (SubjectQuery != "Subject" && CourseNumberQuery != "" && ComponentQuery == "Component"){
          let allstored = [];
         for(i=0 ; i<data.length; i++){
-            if(SubjectQuery == data[i].subject && CourseNumberQuery == data[i].catalog_nbr){
+            let coursecodeCheck = data[i].catalog_nbr.toString();
+            if(!isNaN(CourseNumberQuery)) {
+            coursecodeCheck = coursecodeCheck.replace(/\D/g,'');
+            }
+            if(SubjectQuery == data[i].subject && CourseNumberQuery == coursecodeCheck){
                 allstored.push(data[i]);
             }
         } res.send(allstored);
@@ -89,7 +98,11 @@ app.get('/api/courses/submit' , (req,res) => {
     else if (SubjectQuery=="Subject" && CourseNumberQuery != "" && ComponentQuery=="Component"){
         let allstored = [];
         for(i=0; i<data.length; i++){
-            if(CourseNumberQuery == data[i].catalog_nbr){
+            let coursecodeCheck = data[i].catalog_nbr.toString();
+            if(!isNaN(CourseNumberQuery)) {
+            coursecodeCheck = coursecodeCheck.replace(/\D/g,'');
+            }
+            if(CourseNumberQuery == coursecodeCheck){
                 allstored.push(data[i]);
             }
         }
@@ -165,6 +178,7 @@ app.get('/api/courses/searching/:coursecode', (req,res) => {
     let coursecode = req.params.coursecode.toUpperCase();
     let NumberArray = [];
     for(k=0; k< data.length; k++){
+        
         if (coursecode == data[k].catalog_nbr){
             NumberArray.push(data[k]);
         }
@@ -228,26 +242,56 @@ app.get('/api/courses/search/:subjectcode/:coursecode', (req,res) => {
 //Create a new schedule (to save a list of courses) with a given schedule name. Return an error if name exists
 app.post('/api/schedules/createschedule' ,(req,res) => {
     //the input should be at least one character for the name of the schedule and one query only
-    const schema = joi.object({
-        name:joi.string().max(18).min(1).regex(regexCharacters).required()
+    let schema = joi.object({
+        name:joi.string().max(18).min(1).regex(regexCharacters).required(),
+        description:joi.string().max(50).regex(regexCharacters),
+        ScheduleToken: joi.string().required()
+
     })
-    const RESULT = schema.validate(req.query);
+    let RESULT = schema.validate(req.query);
     if (RESULT.error){
-        res.status(400).send({message: "Bad Query"});
+        res.send({message: "Bad Query"});
         return; 
 
     }
     CurrentData =req.query.name;
+    CurrentDescription = req.query.description;
+    //Verify schedule token
+    let userData = {};
+    let ScheduleToken= req.query.ScheduleToken;
+    try {
+        userData = jwt.verify(ScheduleToken, AccessToken);
+    } catch(err) {
+        res.send("Not allowed");
+        return;
+    }
+
+    let ScheduleOwner = userData.UserName;
+    let EmailOwner = userData.Email;
+    let count = 0;
+    let ListOfSchedule = db.get('schedules').value();
+    for(let i =0; i< ListOfSchedule.length ; i++){
+        if(ListOfSchedule[i].Email == EmailOwner){
+            count++;
+        }
+    }  
+    
+
+
     //if the schedule name is already exist
-    if (db.get('schedules').find({scheduleName: CurrentData}).value()){
-    return res.status(400).send({message: "Something Went Wrong"});
-    } else {
+    if (db.get('schedules').find({scheduleName: CurrentData, Email: EmailOwner}).value()){
+    return res.send({message: "The schedule name is already exist"});
+    } 
+    else if (count == 20){
+        res.send({message: 'You cannot add more than 20 schedules'});
+    }
+    else  {
 
     db.get('schedules')
-    .push({ scheduleName: CurrentData, CourseList: []})
+    .push({ scheduleName: CurrentData, scheduleDescription: CurrentDescription, Email: EmailOwner, scheduleowner: ScheduleOwner, Visiblity: "Private", CourseList: []})
     .write()
 
-    return res.status(200).send({message: "schedule added"});
+    return res.send({message: "schedule added"});
    }    
 });
  
@@ -378,13 +422,40 @@ app.delete('/api/schedules', (req,res) => {
 
 //Get a list of schedule names and the number of courses that are saved in each schedule.
 app.get('/api/schedules/schedulesList', (req,res) => {
-           
+    let schema = joi.object({
+        ScheduleToken: joi.string().required()
+
+    })
+    let RESULT = schema.validate(req.query);
+    if (RESULT.error){
+        res.send({message: "Bad Query"});
+        return; 
+
+    }
+   
+    //Verify schedule token
+    let userData = {};
+    let ScheduleToken= req.query.ScheduleToken;
+    try {
+        userData = jwt.verify(ScheduleToken, AccessToken);
+    } catch(err) {
+        res.send("Not allowed");
+        return;
+    }   
         let ScheduleArray = [];
+        let ReturnArray = [];
         ScheduleArray = db.get('schedules').value();
+        for(let i =0; i < ScheduleArray.length; i++){
+            if(ScheduleArray[i].Email == userData.Email){
+                ReturnArray.push(
+                    ScheduleArray[i].scheduleName
+                )
+            }
+            
+
+        }
         
-        
-       
-        res.send(ScheduleArray);
+        res.send(ReturnArray);
     
 });
 
@@ -448,11 +519,11 @@ function validateEmail(email) {
 
 //Tokens
 function generateAdministratorToken(LogginIn){
-    return jwt.sign(LogginIn, AdminToken, { expiresIn: '30m'})
+    return jwt.sign(LogginIn, AdminToken, { expiresIn: '69m'})
 }
 
 function generateToken(Storage2){
-    return jwt.sign(Storage2, AccessToken, { expiresIn: '30m'})
+    return jwt.sign(Storage2, AccessToken, { expiresIn: '69m'})
 }
 
 
@@ -529,6 +600,7 @@ app.post('/login', async (req,res) =>{
                         AccessingToken: AccessingToken,
                         RefreshingToken: RefreshToken,
                         UserName: Storage2.UserName,
+                        Email: Storage2.Email,
                         message: 'You have been successfully logged in'
                     })
                 } else {
@@ -559,6 +631,21 @@ app.post('/login', async (req,res) =>{
         reactivation = req.body.Email;
         User_Reactivation = UserInformation.get('UserInfo').find({Email: reactivation}).assign({Verification: "Active"}).write();
         res.send({message: 'Reactivated'});
+    })
+
+    //public
+    app.put('/public', (req,res) => {
+        public = req.body.ScheduleName
+        SchedulePublic = db.get('schedules').find({scheduleName: public}).assign({Visibility: "Public"}).write();
+        res.send({message: 'Public'});
+
+    })
+    //private
+    app.put('/private', (req,res) => {
+        private = req.body.ScheduleName
+        SchedulePrivate = db.get('schedules').find({scheduleName: private}).assign({Visibility: "Private"}).write();
+        res.send({message: 'Private'});
+        
     })
 
     //Search by keywords
