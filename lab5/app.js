@@ -684,6 +684,33 @@ app.post('/login', async (req,res) =>{
         res.send(UserArray);
     
 });
+//updating the password
+app.put('/updatepassword', async (req,res) => {
+
+    let userData = {};
+    let PasswordToken= req.body.ScheduleToken;
+    try {
+        userData = jwt.verify(PasswordToken, AccessToken);
+    } catch(err) {
+        res.send("Not allowed");
+        return;
+    }
+
+
+    const hashing = await encryption.genSalt();
+    const protect = await encryption.hash(req.body.Password, hashing);
+    
+    if(UserInformation.get('UserInfo').find({Email: userData.Email})){
+        UserInformation.get('UserInfo').find({Email: userData.Email}).assign({Password: protect}).write();
+        res.send({message: 'You Password has been updated'});
+    }
+    else{
+        res.send({message: 'The user not found'});
+    }
+
+
+
+})
 
 
 
