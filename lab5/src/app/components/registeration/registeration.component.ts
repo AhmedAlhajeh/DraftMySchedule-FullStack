@@ -19,9 +19,10 @@ export class RegisterationComponent implements OnInit {
   constructor(private http: HttpClient, private route: Router) { }
 
   visible: boolean = false; 
+  //registeration fuctionality
   register(): void {
     var CheckUserName = (<HTMLInputElement>document.getElementById("UserName")).value;
-    if(CheckUserName.match(this.regexCharacters)){
+    if(CheckUserName.match(this.regexCharacters)){//input sanitization fot the username
     var UsernameInformation = {
       UserName: this.UserName,
       Email: this.Email,
@@ -33,7 +34,7 @@ export class RegisterationComponent implements OnInit {
       
       if (data.message == 'You have been registered!'){
         alert("You have been registered");
-        this.visible = true;
+        this.visible = true; //a button will show up to ask the user to verify his/her email
 
       }else if(data.message == 'The email is already exist!'){
         alert("The email already exists!");
@@ -45,7 +46,7 @@ export class RegisterationComponent implements OnInit {
       alert("Bad UserName Input");
     }
   }
-
+  //verify the email functionality which is making the account active after clciking on verify your email button
   verification(): void {
       var UsernameInformationForVerification = {
       UserName: this.UserName,

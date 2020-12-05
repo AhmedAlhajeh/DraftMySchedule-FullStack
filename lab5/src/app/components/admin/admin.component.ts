@@ -12,8 +12,10 @@ export class AdminComponent implements OnInit {
   URI = 'http://localhost:3000';
 
 
-
-
+  logout(): void{
+    localStorage.Token = "";
+  }
+//the admin will be able to deactivate the accounts, so the user won't be able to log in
   deactivateUsers(): void {
     var Deactivating = (<HTMLInputElement>document.getElementById('UserName')).value; 
     var DeactivatingEmail = {
@@ -28,7 +30,7 @@ export class AdminComponent implements OnInit {
 
     })
 }
-
+//The admin will be able to reactivate the accounts so they can log in
 reactivateUsers(): void {
   var Reactivating = (<HTMLInputElement>document.getElementById('UserName')).value; 
   var ReactivatingEmail = {
@@ -50,7 +52,7 @@ reactivateUsers(): void {
 
 
 
-
+  //on opening the page, the admin will see all users as a drop down menu so the admin can deactivate and reactivate the accounts
   ngOnInit(): void {
 
     this.http.get<any>(this.URI + '/usersList').subscribe(data => {

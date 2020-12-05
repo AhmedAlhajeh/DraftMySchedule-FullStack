@@ -8,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 export class AuthenticatedNavbarComponent implements OnInit {
 
   constructor() { }
-
+  //by pressing home on hte navbar the user will log out and go to the home page
   logout(): void{
     localStorage.Token = "";
   }

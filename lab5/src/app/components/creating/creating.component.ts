@@ -19,35 +19,46 @@ export class CreatingComponent implements OnInit {
  createASchedule(): void {
    var SCHEDULENAME = (<HTMLInputElement>document.getElementById('ScheduleName')).value;
    var SCHEDULEDESCRIPTION = (<HTMLInputElement>document.getElementById('ScheduleDescription')).value;
-   if(SCHEDULENAME.length == 0 || SCHEDULENAME.length == undefined){
+   if(SCHEDULENAME.length == 0 || SCHEDULENAME.length == undefined){ //we have to put a name for the schedule
      alert("Please input a name for the schedule");
      return;
    }
-   if(SCHEDULENAME.match(this.regexCharacters) && SCHEDULEDESCRIPTION.match(this.regexCharacters)){ //input sanitization we add a schedule name
+   if(SCHEDULENAME.match(this.regexCharacters) && SCHEDULEDESCRIPTION.match(this.regexCharacters)){ //input sanitization we add a schedule name and description
     var ScheduleToken = {
       Token: localStorage.Token
     }
-     
+     //if the user does not want to put a description for the schedule
     if(SCHEDULEDESCRIPTION == ""){
 
       
       //connect it to the back end by adding a schedule name
    this.http.post<any>(this.URI + '/api/schedules/createschedule?name='+SCHEDULENAME + '&ScheduleToken=' + ScheduleToken.Token, ScheduleToken).subscribe(data =>{
-    if(data.message = "The schedule name is already exist"){
-      alert("The schedule name is already exist")
+    if(data.message == "The schedule name is already exist"){ //if the name of the shcedule is alredy exist for the user
+      alert("The schedule name is already exist");
+      return;
+    }
+    else if(data.message = 'You cannot add more than 20 schedules'){
+      alert("You Cannot add more than 20 schedules")
+      return;
     }
     else{
-    alert(data.message);
+    alert("schedule added");
     location.reload();
     }
     })
 
     }
-    else{
-      //connect it to the back end by adding a schedule name
+    else{ 
+      //if the user wants to add a description for the schedule
+      //connect it to the back end by adding a schedule name with the description
    this.http.post<any>(this.URI + '/api/schedules/createschedule?name='+SCHEDULENAME + '&description=' + SCHEDULEDESCRIPTION + '&ScheduleToken=' + ScheduleToken.Token, ScheduleToken).subscribe(data =>{
-    if(data.message = "The schedule name is already exist"){
+    if(data.message == "The schedule name is already exist"){
       alert("The schedule name is already exist")
+      return;
+    }
+    else if(data.message = 'You cannot add more than 20 schedules'){
+      alert("You Cannot add more than 20 schedules")
+      return;
     }
     else{
     alert("The schedule with the name and description you entered has been created");
@@ -75,15 +86,13 @@ export class CreatingComponent implements OnInit {
   //search for course functionality
  courseSearch(): void {
   var ResultBox = document.getElementById("resultbox");
-  //ResultBox.innerHTML = "";
-  //ResultBox.setAttribute("class"," message");
   var subject = (<HTMLInputElement>document.getElementById('Subject')).value;
   var CourseNum = (<HTMLInputElement>document.getElementById('CourseNumber')).value;
   var component = (<HTMLInputElement>document.getElementById('Component')).value;
   var url = '/api/courses/submit?' + "Subject=" + subject + "&CourseNumber=" + CourseNum + "&Component=" + component;
   
   //connect it to the back end and get the info form json file
-  this.http.get<any>("http://localhost:3000"+ url).subscribe((data: any) =>{
+  this.http.get<any>( 'http://localhost:3000' + url).subscribe((data: any) =>{
     if(data.length == undefined){ //if we are trying to search all subjects and courses at the same time
       alert(data.message);
       return;
@@ -110,7 +119,7 @@ export class CreatingComponent implements OnInit {
   
    //Automatically makes the drop down menu for searching subjects work
   ngOnInit()  {
-    if(localStorage.Token == "" || localStorage.Token == undefined){
+    if(localStorage.Token == "" || localStorage.Token == undefined){//the user cannot move to pages where he/she can create schedules until they are logged in
       this.route.navigate(['/Home']);
     }
 

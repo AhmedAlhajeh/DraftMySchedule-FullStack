@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-
 @Component({
-  selector: 'app-browsing',
-  templateUrl: './browsing.component.html',
-  styleUrls: ['./browsing.component.css']
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
 })
-export class BrowsingComponent implements OnInit {
-
+export class HomeComponent implements OnInit {
   courses: any[];
   constructor(private http: HttpClient) {this.courses = [] }
   URI = 'http://localhost:3000';
@@ -17,22 +15,29 @@ export class BrowsingComponent implements OnInit {
    //search for course functionality
    courseSearch(): void {
     var ResultBox = document.getElementById("resultbox");
+    //ResultBox.innerHTML = "";
+    //ResultBox.setAttribute("class"," message");
     var subject = (<HTMLInputElement>document.getElementById('Subject')).value;
     var CourseNum = (<HTMLInputElement>document.getElementById('CourseNumber')).value;
     var component = (<HTMLInputElement>document.getElementById('Component')).value;
     var url = '/api/courses/submit?' + "Subject=" + subject + "&CourseNumber=" + CourseNum + "&Component=" + component;
     
     //connect it to the back end and get the info form json file
-    this.http.get<any>( this.URI + url).subscribe(data =>{
+    this.http.get<any>("http://localhost:3000"+ url).subscribe(data =>{
       if(data.length == undefined){ //if we are trying to search all subjects and courses at the same time
         alert(data.message);
         return;
       }
       this.courses = data; //we put data in the array we created above
 
-       
+       //we cannot search by course number only
+       if(data.message == "Do not search by course number only."){
+        const CourseNumberText = document.createTextNode("You can't choose a course number only. You have to Choose a subject as well");
+        ResultBox?.appendChild(CourseNumberText);
+
+      }
       //we cannot search by component only
-      if(data.message == "Do not search by component only."){
+      else if(data.message == "Do not search by component only."){
         const ComponentText = document.createTextNode("You can't choose a course component only. You have to Choose a subject as well");
         ResultBox?.appendChild(ComponentText);
 
@@ -42,37 +47,6 @@ export class BrowsingComponent implements OnInit {
     
     
     
-  }
-
-  keywordSearch(): void {
-    var keyword2 = (<HTMLInputElement>document.getElementById('Keywords')).value;
-    var url2 = '/keywords?keyword=' + keyword2;
-    if(keyword2.length == undefined || keyword2.length < 4){ //if we are trying to search all subjects and courses at the same time
-      alert("You cannot search by keywords with less than 4 characters");
-      return;
-    }
-    this.http.get<any>(this.URI + url2).subscribe(data => {
-       
-      this.courses = data; //we put data in the array we created above
-    })
-  }
-
-  showDetail(subject: String, catalog_nbr: String){
-     this.http.get<any>(this.URI + '/api/courses/search/'+ subject + "/" + catalog_nbr).subscribe(data => {
-      let DetailString = "";       //Alert string to be displayed
-      DetailString += data.subject + " " + data.catalog_nbr + "\r\n";
-      DetailString += data.catalog_description + "\r\n\r\n";
-       
-      DetailString += data.course_info[0].enrl_stat + "\r\n";
-      DetailString += data.course_info[0].class_nbr + "\r\n";
-      DetailString += data.course_info[0].facility_ID + "\r\n";
-      DetailString += data.course_info[0].campus + "\r\n";
-      DetailString += data.course_info[0].instructors + "\r\n";
-      DetailString += data.course_info[0].descr + "\r\n";
-      DetailString += "\r\n";
-      
-      alert(DetailString); 
-     })
   }
   
   //Automatically makes the drop down menu for searching subjects work

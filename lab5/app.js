@@ -100,7 +100,7 @@ app.get('/api/courses/submit' , (req,res) => {
         for(i=0; i<data.length; i++){
             let coursecodeCheck = data[i].catalog_nbr.toString();
             if(!isNaN(CourseNumberQuery)) {
-            coursecodeCheck = coursecodeCheck.replace(/\D/g,'');
+            coursecodeCheck = coursecodeCheck.replace(/\D/g,'');//just to make sure wa can search using 3316 or 3316a/A
             }
             if(CourseNumberQuery == coursecodeCheck){
                 allstored.push(data[i]);
@@ -241,11 +241,11 @@ app.get('/api/courses/search/:subjectcode/:coursecode', (req,res) => {
 
 //Create a new schedule (to save a list of courses) with a given schedule name. Return an error if name exists
 app.post('/api/schedules/createschedule' ,(req,res) => {
-    //the input should be at least one character for the name of the schedule and one query only
+    //the input should be at least one character for the name of the schedule 
     let schema = joi.object({
         name:joi.string().max(18).min(1).regex(regexCharacters).required(),
         description:joi.string().max(50).regex(regexCharacters),
-        ScheduleToken: joi.string().required()
+        ScheduleToken: joi.string().required()//we want to make sure the user can only see his/her schedules
 
     })
     let RESULT = schema.validate(req.query);
@@ -469,8 +469,10 @@ res.send({message: "All schedules have been deleted successfully "})
 
 //Register lab5
 app.post('/register', async(req,res) => {
+    CurrentPasswordData = req.body.Password
+    //we are trying to encrypt the passwprd for privacy and cyber attack
     const hashing = await encryption.genSalt();
-    const protect = await encryption.hash(req.body.Password, hashing);
+    const protect = await encryption.hash(CurrentPasswordData, hashing);
     const registeration = {
         UserName: req.body.UserName,
         Email: req.body.Email,
@@ -517,7 +519,7 @@ function validateEmail(email) {
 
 
 
-//Tokens
+//Tokens will expire after 69 minutes
 function generateAdministratorToken(LogginIn){
     return jwt.sign(LogginIn, AdminToken, { expiresIn: '69m'})
 }
@@ -542,7 +544,7 @@ app.post('/login', async (req,res) =>{
     if(!ShowResult){
         return res.send({ message: 'Please put a valid email'})
     }
-
+    //Admin UserName and Password
     const AdminEmail = "AhmedAlhajeh@uwo.ca";
     const AdminPassword = "se3316lab5";
 
@@ -572,7 +574,7 @@ app.post('/login', async (req,res) =>{
           }
 
     }
-
+    //log in functionality for other users
     const Storage2 = UserInformation.get('UserInfo').find({ Email: LoginEmail }).value();
     
     if (Storage2 == null) {
@@ -690,13 +692,13 @@ app.put('/updatepassword', async (req,res) => {
     let userData = {};
     let PasswordToken= req.body.ScheduleToken;
     try {
-        userData = jwt.verify(PasswordToken, AccessToken);
+        userData = jwt.verify(PasswordToken, AccessToken);//we have to verify the password token with the access token so we can update the password for the logged in user
     } catch(err) {
         res.send("Not allowed");
         return;
     }
 
-
+    // encrypt the new password for that specific user
     const hashing = await encryption.genSalt();
     const protect = await encryption.hash(req.body.Password, hashing);
     

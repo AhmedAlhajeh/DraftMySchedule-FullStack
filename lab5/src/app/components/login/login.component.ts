@@ -21,8 +21,9 @@ export class LoginComponent implements OnInit {
       Password: this.Password
       
     }
+    //take the user information from the data base to be able to log in
     this.http.post<any>(this.URI + 'login', AccountInformation).subscribe(data => {
-      console.log(data);
+      
       if (data.message == 'You should put your email and password'){
         alert("You should put both your email and password");
         
@@ -49,9 +50,11 @@ export class LoginComponent implements OnInit {
       else if(data.message == 'Unable to login'){
         alert("Unable to login");
       }
-      else if(data.message == 'You have been successfully logged in'){
+      else if(data.message == 'You have been successfully logged in'){//in case the user succesfuly logged in, we need to save the tokens to make sure the user cannot see other people tables
         alert("You have been successfully logged in");
         localStorage.Token = data.AccessingToken;
+        localStorage.setItem("UserName", data.UserName);
+        localStorage.setItem("Email", data.Email);
         this.route.navigate(['/creating']);
       }
       else if(data.message == 'You cannot login. Your account is deactivated'){

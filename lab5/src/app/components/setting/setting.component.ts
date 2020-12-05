@@ -11,10 +11,11 @@ export class SettingComponent implements OnInit {
 
   constructor(private http: HttpClient, private route: Router) { }
   URI = 'http://localhost:3000';
-
+  
+  //updating the password functionality
   updatePassword(): void{
     var UserPassword = (<HTMLInputElement>document.getElementById('UpdatePassword')).value;
-    this.http.put<any>(this.URI + '/updatepassword', {ScheduleToken: localStorage.Token, Password: UserPassword }).subscribe(data =>{
+    this.http.put<any>(this.URI + '/updatepassword', {ScheduleToken: localStorage.Token, Password: UserPassword }).subscribe(data =>{//making sure we update the password for the specific user who logged in
       if(data.message = 'You Password has been updated'){
         alert("Your Password has been updated");
       }

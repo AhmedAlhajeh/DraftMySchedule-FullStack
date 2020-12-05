@@ -14,6 +14,8 @@ import { BrowsingComponent } from './components/browsing/browsing.component';
 import { AuthenticatedNavbarComponent } from './components/authenticated-navbar/authenticated-navbar.component';
 import { VerifiedComponent } from './components/verified/verified.component';
 import { AdminComponent } from './components/admin/admin.component';
+import { SettingComponent } from './components/setting/setting.component';
+
 
 @NgModule({
   declarations: [
@@ -27,7 +29,8 @@ import { AdminComponent } from './components/admin/admin.component';
     BrowsingComponent,
     AuthenticatedNavbarComponent,
     VerifiedComponent,
-    AdminComponent
+    AdminComponent,
+    SettingComponent
   ],
   imports: [
     BrowserModule,
