@@ -1,1 +1,2 @@
-# se3316-aalhajeh-lab5
+DraftMySchedule application with User Authentication using Angular.js, HTML, CSS for FrontEnd.
+BackEnd using node.js, express.js and more
